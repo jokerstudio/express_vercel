@@ -10,11 +10,13 @@ const app = express();
 app.use((req, res, next) => {
   const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   const abi = JSON.parse(rawJson);
+  const privateKey = `${process.env.PRIVATE_KEY}`;
   const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
+  const signer = new eth.Wallet(privateKey, provider);
   const contract = new eth.Contract(
     '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
     abi,
-    provider
+    signer
   );
   req.abi = abi;
   req.contract = contract;
@@ -31,6 +33,13 @@ app.get("/greet", async (req, res) => {
   const greet = await req.contract.greet("Joker: ")
   res.send(greet);
 });
+
+app.get("/greeting/:msg", async (req, res) => {
+  const msg = req.params.msg;
+  const tx = await req.contract.greeting(msg);
+  res.send(tx.hash)
+});
+
 
 app.get("/abi", (req, res) => {
   res.send(req.abi);
