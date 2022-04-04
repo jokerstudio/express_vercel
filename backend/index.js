@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/greet", async (req, res) => {
-  const greet = await contract.greet("Joker: ")
+  const greet = contract.greet("Joker: ")
   res.send(greet);
 });
 
