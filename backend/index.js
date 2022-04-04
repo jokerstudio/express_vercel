@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   res.send("Express on Vercel");
 });
 
-app.get("/greet", (req, res) => {
+app.get("/greet", async (req, res) => {
   const greet = await contract.greet("Joker: ")
   res.send(greet);
 });
