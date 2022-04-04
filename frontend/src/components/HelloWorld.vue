@@ -30,7 +30,7 @@ onMounted(async()=> {
 })
 
 const setGreeting = async () => {
-  const tx = await contract.setGreeting(inputMsg.value)
+  const tx = await contract.setGreeting(inputMsg.value, {gasLimit: 30000})
   txHash.value = tx.hash
   await tx.wait()
   window.location.reload()
