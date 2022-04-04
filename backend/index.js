@@ -18,8 +18,6 @@ app.get("/greet", async (req, res) => {
 });
 
 app.get("/abi", (req, res) => {
-  const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
-  const abi = JSON.parse(rawJson)
   res.send(abi);
 });
 
