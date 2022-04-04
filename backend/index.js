@@ -16,7 +16,7 @@ app.get("/products", (req, res) => {
 
 // Initialize server
 app.listen(5000, () => {
-  const rawJson = fs.readFileSync('./abi.json')
+  const rawJson = fs.readFileSync('abi.json')
   abi = JSON.parse(rawJson)
   console.log("Running on port 5000.");
 });
