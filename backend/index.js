@@ -2,11 +2,13 @@
 const express = require("express");
 const { join } = require('path');
 const fs = require('fs');
-const eth = require('ethers')
+const eth = require('ethers');
+const cors = require('cors');
 
 // Initialize Express
 const app = express();
 
+app.use(cors());
 app.use((req, res, next) => {
   const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   const abi = JSON.parse(rawJson);
@@ -37,7 +39,7 @@ app.get("/greet", async (req, res) => {
 app.get("/greeting/:msg", async (req, res) => {
   const msg = req.params.msg;
   const tx = await req.contract.setGreeting(msg);
-  res.send(tx.hash)
+  res.send(tx.hash);
 });
 
 

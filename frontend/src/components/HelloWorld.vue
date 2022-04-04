@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import abi from '../assets/abi.json'
+import { ethers } from 'ethers'
+import axios from 'axios'
 
 defineProps({
   msg: String
@@ -14,12 +16,16 @@ let contract = {}
 
 onMounted(async()=> {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const account = await provider.getSigner().getAddress()
+  await provider.send("eth_requestAccounts", [])
   contract = new ethers.Contract(
     '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
     abi,
     provider.getSigner()
   )
+
+  axios.get('https://express-vercel-amber-six.vercel.app/greet').then(res => {
+    msg.value = res.data
+  })
 })
 
 const setGreeting = async () => {
@@ -50,8 +56,7 @@ const setGreeting = async () => {
 
   <button type="button" @click="count++">count is: {{ count }}</button>
   <p>
-    Edit
-    <code>components/HelloWorld.vue</code> to test hot module replacement.
+    {{ msg }}
   </p>
   <input v-model="msg" />
   <br/>
