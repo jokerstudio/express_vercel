@@ -1,11 +1,33 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import abi from '../assets/abi.json'
 
 defineProps({
   msg: String
 })
 
 const count = ref(0)
+const msg = ref("")
+const txHash = ref("")
+
+let contract = {}
+
+onMounted(async()=> {
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const account = await provider.getSigner().getAddress()
+  contract = new ethers.Contract(
+    '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
+    abi,
+    provider.getSigner()
+  )
+})
+
+const setGreeting = async () => {
+  const tx = await contract.setGreeting(msg.value)
+  txHash.value = tx.hash
+  await tx.wait()
+  window.location.reload()
+}
 </script>
 
 <template>
@@ -31,6 +53,11 @@ const count = ref(0)
     Edit
     <code>components/HelloWorld.vue</code> to test hot module replacement.
   </p>
+  <input v-model="msg" />
+  <br/>
+  <button type="button" @click="setGreeting">Set Greeting</button>
+  <br/>
+  <h1 style="color:red">{{ txHash }}</h1>
 </template>
 
 <style scoped>
