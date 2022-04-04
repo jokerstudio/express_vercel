@@ -11,7 +11,7 @@ app.use((req, res, next) => {
   const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   const abi = JSON.parse(rawJson);
   const privateKey = `${process.env.PRIVATE_KEY}`;
-  const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
+  const provider = new eth.providers.JsonRpcProvider(`${process.env.RINKEBY_URL}`, 4);
   const signer = new eth.Wallet(privateKey, provider);
   const contract = new eth.Contract(
     '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
@@ -36,7 +36,7 @@ app.get("/greet", async (req, res) => {
 
 app.get("/greeting/:msg", async (req, res) => {
   const msg = req.params.msg;
-  const tx = await req.contract.greeting(msg);
+  const tx = await req.contract.setGreeting(msg);
   res.send(tx.hash)
 });
 
