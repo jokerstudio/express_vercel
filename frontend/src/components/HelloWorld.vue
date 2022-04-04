@@ -10,6 +10,7 @@ defineProps({
 
 const count = ref(0)
 const msg = ref("")
+const inputMsg = ref("")
 const txHash = ref("")
 
 let contract = {}
@@ -29,7 +30,7 @@ onMounted(async()=> {
 })
 
 const setGreeting = async () => {
-  const tx = await contract.setGreeting(msg.value)
+  const tx = await contract.setGreeting(inputMsg.value)
   txHash.value = tx.hash
   await tx.wait()
   window.location.reload()
@@ -58,7 +59,7 @@ const setGreeting = async () => {
   <p>
     {{ msg }}
   </p>
-  <input v-model="msg" />
+  <input v-model="inputMsg" />
   <br/>
   <button type="button" @click="setGreeting">Set Greeting</button>
   <br/>
