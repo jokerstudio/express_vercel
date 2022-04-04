@@ -8,7 +8,7 @@ const eth = require('ethers')
 const app = express();
 
 app.use((req, res, next) => {
-  const rawJson = fs.readFileSync('abi.json', 'utf8');
+  const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   const abi = JSON.parse(rawJson);
   const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
   const contract = new eth.Contract(
