@@ -1,5 +1,6 @@
 // Add Express
 const express = require("express");
+const { join } = require('path');
 const fs = require('fs');
 
 // Initialize Express
@@ -21,7 +22,7 @@ app.get("/abi", (req, res) => {
 
 // Initialize server
 app.listen(5000, () => {
-  const rawJson = fs.readFileSync('abi.json')
+  const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   abi = JSON.parse(rawJson)
   console.log("Running on port 5000.");
 });
