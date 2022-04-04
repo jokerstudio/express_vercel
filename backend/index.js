@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/products", (req, res) => {
-  res.send("v2");
+  res.send("v3");
 });
 
 app.get("/abi", (req, res) => {
