@@ -7,35 +7,38 @@ const eth = require('ethers')
 // Initialize Express
 const app = express();
 
+app.use((req, res, next) => {
+  const rawJson = fs.readFileSync('abi.json', 'utf8');
+  const abi = JSON.parse(rawJson);
+  const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
+  const contract = new eth.Contract(
+    '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
+    abi,
+    provider
+  );
+  req.abi = abi;
+  req.contract = contract;
+  console.log('Time:', Date.now());
+  next();
+});
+
 // Create GET request
 app.get("/", (req, res) => {
   res.send("Express on Vercel");
 });
 
 app.get("/greet", async (req, res) => {
-  const contract = app.get('contract');
-  const greet = await contract.greet("Joker: ")
+  const greet = await req.contract.greet("Joker: ")
   res.send(greet);
 });
 
 app.get("/abi", (req, res) => {
-  const abi = app.get('abi');
-  res.send(abi);
+  res.send(req.abi);
 });
 
 
 // Initialize server
 app.listen(5000, () => {
-  const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
-  const abi = JSON.parse(rawJson);
-  const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
-  contract = new eth.Contract(
-    '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
-    abi,
-    provider
-  );
-  app.set('abi', abi);
-  app.set('contract', contract);
   console.log("Running on port 5000.");
 });
 
