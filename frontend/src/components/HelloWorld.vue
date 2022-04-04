@@ -12,6 +12,7 @@ const count = ref(0)
 const msg = ref("")
 const inputMsg = ref("")
 const txHash = ref("")
+const gasLimit = ref(0)
 
 let contract = {}
 
@@ -30,7 +31,7 @@ onMounted(async()=> {
 })
 
 const setGreeting = async () => {
-  const tx = await contract.setGreeting(inputMsg.value, {gasLimit: 30000})
+  const tx = await contract.setGreeting(inputMsg.value, {gasLimit: gasLimit.value})
   txHash.value = tx.hash
   await tx.wait()
   window.location.reload()
@@ -60,6 +61,8 @@ const setGreeting = async () => {
     {{ msg }}
   </p>
   <input v-model="inputMsg" />
+  <br/>
+  <input v-model="gasLimit" />
   <br/>
   <button type="button" @click="setGreeting">Set Greeting</button>
   <br/>
