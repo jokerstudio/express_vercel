@@ -22,7 +22,7 @@ app.get("/abi", (req, res) => {
 
 // Initialize server
 app.listen(5000, () => {
-  const rawJson = fs.readFileSync(join(__dirname, _files, 'abi.json'), 'utf8');
+  const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   abi = JSON.parse(rawJson)
   console.log("Running on port 5000.");
 });
