@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/greet", async (req, res) => {
-  const greet = contract.greet("Joker: ")
+  const greet = await contract.greet("Joker: ")
   res.send(greet);
 });
 
@@ -26,12 +26,12 @@ app.get("/abi", (req, res) => {
 app.listen(5000, () => {
   const rawJson = fs.readFileSync(join(__dirname, 'abi.json'), 'utf8');
   abi = JSON.parse(rawJson);
-  const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4)
+  const provider = new eth.providers.JsonRpcProvider('https://eth-rinkeby.alchemyapi.io/v2/h8PKfl8mDeaHhmiSYsDC1GwsEFDi8cVI', 4);
   contract = new eth.Contract(
     '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
     abi,
     provider
-  )
+  );
   console.log("Running on port 5000.");
 });
 
