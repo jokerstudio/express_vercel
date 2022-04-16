@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import abi from '../assets/abi.json'
-import { ethers } from 'ethers'
+import { ethers, utils } from 'ethers'
 import axios from 'axios'
 
 defineProps({
@@ -9,32 +9,161 @@ defineProps({
 })
 
 const count = ref(0)
-const msg = ref("")
-const inputMsg = ref("")
-const txHash = ref("")
+const msg = ref('')
+const inputMsg = ref('')
+const txHash = ref('')
 const gasLimit = ref(0)
 
-let contract = {}
+let provider = {}
+let signer = {}
+const contractAddress = '0x52AF553ea22e673a6d7E1Bdba6a8cEf7A502D814'
 
 onMounted(async()=> {
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
-  await provider.send("eth_requestAccounts", [])
-  contract = new ethers.Contract(
-    '0x0eEee5E85bbAD93d95Ea76b26675aA38740CAa38',
+  provider = new ethers.providers.Web3Provider(window.ethereum)
+  await provider.send('eth_requestAccounts', [])
+
+  // network N block
+  console.log(await provider.getNetwork())
+  console.log(await await provider.getGasPrice())
+  console.log(await provider.getBlockNumber())
+  console.log(await provider.getBlock(await provider.getBlockNumber()))
+  console.log(parseInt(await provider.getBalance("0xC2B1a26A3AA3847bCeeCE6Cc41C6B7F9beDA8f0A")))
+
+  // signer
+  signer = provider.getSigner()
+  console.log(await signer.getAddress())
+  
+  // utils
+  console.log(utils.parseEther("1.0")) // ether to wei
+  console.log(utils.formatEther("1000000000000000000")) // wei to ether
+  console.log(utils.formatUnits("1000000000000000000", 'gwei')) // wei to (decimal or unit name)
+  console.log(utils.formatUnits("1000000000000000000", 10))
+  console.log(utils.hexlify(1))
+  console.log(utils.hexlify(utils.toUtf8Bytes('Under The Dev')))
+  console.log(utils.toUtf8String('0x556e6465722054686520446576'))
+  
+  // event
+  const filter = {
+    address: contractAddress,
+    topics: [
+        // the name of the event, parnetheses containing the data type of each event, no spaces
+        utils.id("SetGreeting(address,string)")
+    ]
+  }
+  provider.on(filter, (event) => {
+      console.log(event)
+  })
+
+  ////////////////////////////////////////////////////////////////////////////////
+
+  // contract event
+  const contract = new ethers.Contract(
+    contractAddress,
     abi,
-    provider.getSigner()
+    provider // provider or signer
   )
+  contract.on("SetGreeting", (from, message) => {
+    console.log(from, message)
+  })
+  
+  // metamask
+  window.ethereum.on('accountsChanged', (accounts) => {
+    window.location.reload()
+  })
+
+  window.ethereum.on('chainChanged', (chainId) => {
+    window.location.reload()
+  })
 
   axios.get('https://express-vercel-amber-six.vercel.app/greet').then(res => {
     msg.value = res.data
   })
 })
 
-const setGreeting = async () => {
-  const tx = await contract.setGreeting(inputMsg.value, {gasLimit: gasLimit.value})
-  txHash.value = tx.hash
+async function transfer() {
+  const txCount = await provider.getTransactionCount(signer.getAddress())
+
+  //build the raw transaction
+  const rawTx = {
+    nonce: utils.hexlify(txCount),
+    from: signer.getAddress(),
+    to: "0xCf9AE5320563160017e7BAb917F7A5F88AAEEb69",
+    value: utils.parseEther("0.001"),
+    gasLimit: utils.hexlify(30000),
+    gasPrice: utils.hexlify(parseInt(await provider.getGasPrice())),
+  }
+
+  // const rawTx = {
+  //   to: "0xCf9AE5320563160017e7BAb917F7A5F88AAEEb69",
+  //   value: utils.parseEther("0.001"),
+  // }
+
+  const tx = await signer.sendTransaction(rawTx)
+  console.log(tx.hash)
   await tx.wait()
-  window.location.reload()
+}
+
+async function callGreet() {
+  const ABI = ["function greet() view returns (string)"]
+  const iface = new utils.Interface(ABI)
+  const encodedData = iface.encodeFunctionData("greet")
+  const response = await provider.call({
+    to: contractAddress,
+    data: encodedData
+  })
+
+  console.log(utils.toUtf8String(response))
+}
+
+async function setGreetingWithRawTx() {
+  const txCount = await provider.getTransactionCount(signer.getAddress())
+  const ABI = ["function setGreeting(string _greeting)"]
+  const iface = new utils.Interface(ABI)
+  const encodedData = iface.encodeFunctionData("setGreeting", ["Joker Studio"])
+
+  // build the raw transaction
+  const rawTx = {
+    nonce: utils.hexlify(txCount),
+    from: signer.getAddress(),
+    to: contractAddress,
+    data: encodedData,
+    gasLimit: utils.hexlify(100000),
+    gasPrice: utils.hexlify(parseInt(await provider.getGasPrice())),
+  }
+
+  const tx = await signer.sendTransaction(rawTx)
+  await tx.wait()
+  console.log(tx.hash)
+}
+
+async function setGreeting() {
+  const contract = new ethers.Contract(
+    contractAddress,
+    abi,
+    provider // provider or signer
+  )
+  const tx = await contract.connect(signer).setGreeting("Under The Dev")
+  //const tx = await contract.setGreeting("Under The Dev")
+  console.log(tx.hash)
+  await tx.wait()
+}
+
+async function transferWithWallet() {
+  const alchemyProvider = new ethers.providers.JsonRpcProvider("alchemyUrl")
+  // Create a wallet instance
+  const wallet = new ethers.Wallet("privateKey", alchemyProvider)
+
+  // build the raw transaction
+  const rawTx = {
+    to: "0xCf9AE5320563160017e7BAb917F7A5F88AAEEb69",
+    value: utils.parseEther("0.001"),
+    gasLimit: utils.hexlify(30000),
+    gasPrice: utils.hexlify(parseInt(await provider.getGasPrice())),
+  }
+
+  const tx = await wallet.sendTransaction(rawTx)
+  console.log(tx.hash)
+  await tx.wait()
 }
 </script>
 
@@ -62,9 +191,15 @@ const setGreeting = async () => {
   </p>
   <input v-model="inputMsg" />
   <br/>
-  <input v-model="gasLimit" />
+  <button type="button" @click="transfer">Transfer</button>
+  <br/>
+  <button type="button" @click="callGreet">Call greet</button>
+  <br/>
+  <button type="button" @click="setGreetingWithRawTx">Set Greeting With Raw Tx</button>
   <br/>
   <button type="button" @click="setGreeting">Set Greeting</button>
+  <br/>
+  <button type="button" @click="transferWithWallet">Tranfer with wallet</button>
   <br/>
   <h1 style="color:red">{{ txHash }}</h1>
 </template>
