@@ -47,7 +47,8 @@ onMounted(async()=> {
     address: contractAddress,
     topics: [
         // the name of the event, parnetheses containing the data type of each event, no spaces
-        utils.id("SetGreeting(address,string)")
+        utils.id("SetGreeting(address,string)"),
+        utils.hexZeroPad("0xC2B1a26A3AA3847bCeeCE6Cc41C6B7F9beDA8f0A", 32)
     ],
     fromBlock: 0,
   }
@@ -71,7 +72,7 @@ onMounted(async()=> {
   const eventFilter = await contract.filters.SetGreeting()
   let events = await contract.queryFilter(eventFilter)
   events.forEach(event => {
-    console.log(event.args.from, event.args.message)
+    console.log(event.args.from, event.args.greeting)
   })
 
   contract.on("SetGreeting", (from, message) => {
