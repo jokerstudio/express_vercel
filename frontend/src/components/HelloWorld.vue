@@ -48,8 +48,13 @@ onMounted(async()=> {
     topics: [
         // the name of the event, parnetheses containing the data type of each event, no spaces
         utils.id("SetGreeting(address,string)")
-    ]
+    ],
+    fromBlock: 0,
   }
+
+  const logs = await provider.getLogs(filter)
+  console.log(logs)
+
   provider.on(filter, (event) => {
       console.log(event)
   })
@@ -62,6 +67,13 @@ onMounted(async()=> {
     abi,
     provider // provider or signer
   )
+
+  const eventFilter = await contract.filters.SetGreeting()
+  let events = await contract.queryFilter(eventFilter)
+  events.forEach(event => {
+    console.log(event.args.from, event.args.message)
+  })
+
   contract.on("SetGreeting", (from, message) => {
     console.log(from, message)
   })
